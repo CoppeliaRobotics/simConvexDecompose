@@ -1,0 +1,17 @@
+.qmake.stash
+Makefile
+*.o
+libv_repExtConvexDecompose.1.0.0.dylib
+libv_repExtConvexDecompose.1.0.dylib
+libv_repExtConvexDecompose.1.dylib
+libv_repExtConvexDecompose.dylib
+libv_repExtConvexDecompose.so
+libv_repExtConvexDecompose.so.1
+libv_repExtConvexDecompose.so.1.0
+libv_repExtConvexDecompose.so.1.0.0
+Makefile.Debug
+Makefile.Release
+object_script.*.Debug
+object_script.*.Release
+debug/
+release/
