@@ -1,5 +1,5 @@
-#include "v_repExtConvexDecompose.h"
-#include "v_repLib.h"
+#include "simExtConvexDecompose.h"
+#include "simLib.h"
 #include <hacdHACD.h>
 #include <hacdMicroAllocator.h>
 #include "VHACD.h"
@@ -19,7 +19,7 @@
 
 #define PLUGIN_VERSION 1
 
-LIBRARY vrepLib;
+LIBRARY simLib;
 
 int computeHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,size_t nClusters,double concavity,bool addExtraDistPoints,bool addFacesPoints,double ccConnectDist,size_t targetNTrianglesDecimatedMesh,size_t maxHullVertices,double smallestClusterThreshold)
 {
@@ -152,7 +152,7 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
     return((int)nConvexHulls);
 }
 
-VREP_DLLEXPORT unsigned char v_repStart(void* reservedPointer,int reservedInt)
+SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
 {
     // 1. Figure out this plugin's directory:
     char curDirAndFile[1024];
@@ -169,56 +169,56 @@ VREP_DLLEXPORT unsigned char v_repStart(void* reservedPointer,int reservedInt)
 
     std::string currentDirAndPath(curDirAndFile);
 
-    // 2. Append the V-REP library's name:
+    // 2. Append the CoppeliaSim library's name:
     std::string temp(currentDirAndPath);
 #ifdef _WIN32
-    temp+="\\v_rep.dll";
+    temp+="\\coppeliaSim.dll";
 #elif defined (__linux)
-    temp+="/libv_rep.so";
+    temp+="/libcoppeliaSim.so";
 #elif defined (__APPLE__)
-    temp+="/libv_rep.dylib";
+    temp+="/libcoppeliaSim.dylib";
 #endif 
 
-    // 3. Load the V-REP library:
-    vrepLib=loadVrepLibrary(temp.c_str());
-    if (vrepLib==NULL)
+    // 3. Load the CoppeliaSim library:
+    simLib=loadSimLibrary(temp.c_str());
+    if (simLib==NULL)
     {
-        std::cout << "Error, could not find or correctly load the V-REP library. Cannot start 'ConvexDecompose' plugin.\n";
+        std::cout << "Error, could not find or correctly load the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.\n";
         return(0); 
     }
-    if (getVrepProcAddresses(vrepLib)==0)
+    if (getSimProcAddresses(simLib)==0)
     {
-        std::cout << "Error, could not find all required functions in the V-REP library. Cannot start 'ConvexDecompose' plugin.\n";
-        unloadVrepLibrary(vrepLib);
+        std::cout << "Error, could not find all required functions in the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.\n";
+        unloadSimLibrary(simLib);
         return(0);
     }
 
-    // Check the version of V-REP:
-    int vrepVer;
-    simGetIntegerParameter(sim_intparam_program_version,&vrepVer);
-    if (vrepVer<30201)
+    // Check the version of CoppeliaSim:
+    int simVer;
+    simGetIntegerParameter(sim_intparam_program_version,&simVer);
+    if (simVer<30201)
     {
-        std::cout << "Sorry, your V-REP copy is somewhat old. Cannot start 'ConvexDecompose' plugin.\n";
-        unloadVrepLibrary(vrepLib);
+        std::cout << "Sorry, your CoppeliaSim copy is somewhat old. Cannot start 'ConvexDecompose' plugin.\n";
+        unloadSimLibrary(simLib);
         return(0);
     }
 
     return(PLUGIN_VERSION);
 }
 
-VREP_DLLEXPORT void v_repEnd()
+SIM_DLLEXPORT void simEnd()
 {
-    unloadVrepLibrary(vrepLib);
+    unloadSimLibrary(simLib);
 }
 
-VREP_DLLEXPORT void* v_repMessage(int message,int* auxiliaryData,void* customData,int* replyData)
+SIM_DLLEXPORT void* simMessage(int message,int* auxiliaryData,void* customData,int* replyData)
 { // This is called quite often. Just watch out for messages/events you want to handle
     return(NULL);
 }
 
-VREP_DLLEXPORT void v_repHACD(void* data)
+SIM_DLLEXPORT void simHACD(void* data)
 {
-    // Collect info from V-REP:
+    // Collect info from CoppeliaSim:
     void** valPtr=(void**)data;
     float* vertices=((float*)valPtr[0]);
     int verticesLength=((int*)valPtr[1])[0];
@@ -265,9 +265,9 @@ VREP_DLLEXPORT void v_repHACD(void* data)
     }
 }
 
-VREP_DLLEXPORT void v_repVHACD(void* data)
+SIM_DLLEXPORT void simVHACD(void* data)
 {
-    // Collect info from V-REP:
+    // Collect info from CoppeliaSim:
     void** valPtr=(void**)data;
     float* vertices=((float*)valPtr[0]);
     int verticesLength=((int*)valPtr[1])[0];

@@ -1,14 +1,14 @@
 QT -= core
 QT -= gui
 
-TARGET = v_repExtConvexDecompose
+TARGET = simExtConvexDecompose
 TEMPLATE = lib
 
 DEFINES -= UNICODE
 DEFINES += QT_COMPIL
 CONFIG += shared
 INCLUDEPATH += "../include"
-INCLUDEPATH += "../v_repMath"
+INCLUDEPATH += "../simMath"
 INCLUDEPATH += "hacd"
 INCLUDEPATH += "vhacd/inc"
 INCLUDEPATH += "vhacd/public"
@@ -43,20 +43,20 @@ INCLUDEPATH += "vhacd/src"
 }
 
 win32 {
-    DEFINES += WIN_VREP
+    DEFINES += WIN_SIM
 }
 
 macx {
-    DEFINES += MAC_VREP
+    DEFINES += MAC_SIM
 }
 
 unix:!macx {
-    DEFINES += LIN_VREP
+    DEFINES += LIN_SIM
 }
 
 SOURCES += \
-    ../common/v_repLib.cpp \
-    v_repExtConvexDecompose.cpp \
+    ../common/simLib.cpp \
+    simExtConvexDecompose.cpp \
     hacd/hacdGraph.cpp \
     hacd/hacdHACD.cpp \
     hacd/hacdICHull.cpp \
@@ -73,8 +73,8 @@ SOURCES += \
     vhacd/src/vhacdVolume.cpp \
 
 HEADERS +=\
-    ../include/v_repLib.h \
-    v_repExtConvexDecompose.h \
+    ../include/simLib.h \
+    simExtConvexDecompose.h \
     hacd/hacdCircularList.h \
     hacd/hacdGraph.h \
     hacd/hacdHACD.h \
