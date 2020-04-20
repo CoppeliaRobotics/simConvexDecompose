@@ -67,8 +67,8 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
     }
 
     nClusters = myHACD->GetNClusters();
-    printf("Done (%i clusters generated).\n",nClusters);
-    retVal=nClusters;
+    printf("Done (%i clusters generated).\n",int(nClusters));
+    retVal=int(nClusters);
 
     for(size_t c = 0; c < nClusters; ++c)
     {
@@ -108,20 +108,25 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
 {
     printf("Computing the convex decomposition (VHACD)...\n");
     VHACD::IVHACD::Parameters   params;
-    params.m_resolution=resolution;
-    params.m_depth=depth;
-    params.m_concavity=concavity;
-    params.m_planeDownsampling=planeDownsampling;
-    params.m_convexhullDownsampling=convexHullDownsampling;
-    params.m_alpha=alpha;
-    params.m_beta=beta;
-    params.m_gamma=gamma;
+    params.m_resolution=uint32_t(resolution);
+//    params.m_depth=depth;
+    params.m_concavity=double(concavity);
+    params.m_planeDownsampling=uint32_t(planeDownsampling);
+    params.m_convexhullDownsampling=uint32_t(convexHullDownsampling);
+    params.m_alpha=double(alpha);
+    params.m_beta=double(beta);
+//    params.m_gamma=gamma;
     params.m_pca=pca;
     params.m_mode=!voxelBased;
-    params.m_maxNumVerticesPerCH=maxVerticesPerCH;
-    params.m_minVolumePerCH=minVolumePerCH;
+    params.m_maxNumVerticesPerCH=uint32_t(maxVerticesPerCH);
+    params.m_minVolumePerCH=double(minVolumePerCH);
     VHACD::IVHACD* interfaceVHACD=VHACD::CreateVHACD();
-    interfaceVHACD->Compute(vertices,3,verticesLength/3,indices,3,indicesLength/3,params);
+//    interfaceVHACD->Compute(vertices,3,verticesLength/3,indices,3,indicesLength/3,params);
+    uint32_t* tris=new uint32_t[size_t(indicesLength)];
+    for (int i=0;i<indicesLength;i++)
+        tris[i]=uint32_t(indices[i]);
+    interfaceVHACD->Compute(vertices,uint32_t(verticesLength/3),tris,uint32_t(indicesLength/3),params);
+    delete[] tris;
 
     unsigned int nConvexHulls=interfaceVHACD->GetNConvexHulls();
     printf("Done (%i clusters generated).\n",nConvexHulls);
@@ -133,15 +138,15 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
         std::vector<int>* _ind=new std::vector<int>;
         for (unsigned int v=0,idx=0;v<ch.m_nPoints;++v,idx+=3)
         {
-            _vert->push_back(ch.m_points[idx+0]);
-            _vert->push_back(ch.m_points[idx+1]);
-            _vert->push_back(ch.m_points[idx+2]);
+            _vert->push_back(float(ch.m_points[idx+0]));
+            _vert->push_back(float(ch.m_points[idx+1]));
+            _vert->push_back(float(ch.m_points[idx+2]));
         }
         for (unsigned int t=0,idx=0;t<ch.m_nTriangles;++t,idx+=3)
         {
-            _ind->push_back(ch.m_triangles[idx+0]);
-            _ind->push_back(ch.m_triangles[idx+1]);
-            _ind->push_back(ch.m_triangles[idx+2]);
+            _ind->push_back(int(ch.m_triangles[idx+0]));
+            _ind->push_back(int(ch.m_triangles[idx+1]));
+            _ind->push_back(int(ch.m_triangles[idx+2]));
         }
         verticesList.push_back(_vert);
         indicesList.push_back(_ind);
@@ -149,7 +154,7 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
 
     interfaceVHACD->Clean();
     interfaceVHACD->Release();
-    return((int)nConvexHulls);
+    return(int(nConvexHulls));
 }
 
 SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)

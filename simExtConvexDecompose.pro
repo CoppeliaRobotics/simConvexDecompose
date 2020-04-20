@@ -66,10 +66,13 @@ SOURCES += \
     hacd/hacdRaycastMesh.cpp \
     vhacd/src/btAlignedAllocator.cpp \
     vhacd/src/btConvexHullComputer.cpp \
+    vhacd/src/FloatMath.cpp \
     vhacd/src/VHACD.cpp \
+    vhacd/src/VHACD-ASYNC.cpp \
     vhacd/src/vhacdICHull.cpp \
     vhacd/src/vhacdManifoldMesh.cpp \
     vhacd/src/vhacdMesh.cpp \
+    vhacd/src/vhacdRaycastMesh.cpp \
     vhacd/src/vhacdVolume.cpp \
 
 HEADERS +=\
@@ -86,19 +89,20 @@ HEADERS +=\
     hacd/hacdSArray.h \
     hacd/hacdVector.h \
     hacd/hacdVersion.h \
+    vhacd/public/VHACD.h \
     vhacd/inc/btAlignedAllocator.h \
     vhacd/inc/btAlignedObjectArray.h \
     vhacd/inc/btConvexHullComputer.h \
     vhacd/inc/btMinMax.h \
     vhacd/inc/btScalar.h \
     vhacd/inc/btVector3.h \
-    vhacd/public/VHACD.h \
-    vhacd/inc/vhacdCircular.h \
+    vhacd/inc/FloatMath.h \
+    vhacd/inc/vhacdCircularList.h \
     vhacd/inc/vhacdlCHull.h \
     vhacd/inc/vhacdManifoldMesh.h \
     vhacd/inc/vhacdMesh.h \
-    vhacd/inc/vhacdMesh.h \
     vhacd/inc/vhacdMutex.h \
+    vhacd/inc/vhacdRaycastMesh.h \
     vhacd/inc/vhacdSArray.h \
     vhacd/inc/vhacdTimer.h \
     vhacd/inc/vhacdVector.h \
