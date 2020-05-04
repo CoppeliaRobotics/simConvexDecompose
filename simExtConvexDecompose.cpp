@@ -19,13 +19,15 @@
 
 #define PLUGIN_VERSION 1
 
-LIBRARY simLib;
+static LIBRARY simLib;
+static int verbosity;
 
 int computeHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,size_t nClusters,double concavity,bool addExtraDistPoints,bool addFacesPoints,double ccConnectDist,size_t targetNTrianglesDecimatedMesh,size_t maxHullVertices,double smallestClusterThreshold)
 {
     int retVal=0;
 
-    printf("Computing the convex decomposition (HACD)...\n");
+    if (verbosity>=sim_verbosity_infos)
+        printf("Convex decompose plugin: computing the convex decomposition (HACD)...\n");
     std::vector< HACD::Vec3<HACD::Real> > points;
     std::vector< HACD::Vec3<long> > triangles;
 
@@ -67,7 +69,8 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
     }
 
     nClusters = myHACD->GetNClusters();
-    printf("Done (%i clusters generated).\n",int(nClusters));
+    if (verbosity>=sim_verbosity_infos)
+        printf("Convex decompose plugin: done (%i clusters generated).\n",int(nClusters));
     retVal=int(nClusters);
 
     for(size_t c = 0; c < nClusters; ++c)
@@ -106,7 +109,8 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
 
 int computeVHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,int resolution,int depth,float concavity,int planeDownsampling,int convexHullDownsampling,float alpha,float beta,float gamma,bool pca,bool voxelBased,int maxVerticesPerCH,float minVolumePerCH)
 {
-    printf("Computing the convex decomposition (VHACD)...\n");
+    if (verbosity>=sim_verbosity_infos)
+        printf("Convex decompose plugin: computing the convex decomposition (VHACD)...\n");
     VHACD::IVHACD::Parameters   params;
     params.m_resolution=uint32_t(resolution);
 //    params.m_depth=depth;
@@ -129,7 +133,8 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
     delete[] tris;
 
     unsigned int nConvexHulls=interfaceVHACD->GetNConvexHulls();
-    printf("Done (%i clusters generated).\n",nConvexHulls);
+    if (verbosity>=sim_verbosity_infos)
+        printf("Convex decompose plugin: done (%i clusters generated).\n",nConvexHulls);
     VHACD::IVHACD::ConvexHull ch;
     for (unsigned int p=0;p<nConvexHulls;++p)
     {
@@ -207,6 +212,7 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
         unloadSimLibrary(simLib);
         return(0);
     }
+    simGetInt32Parameter(sim_intparam_verbosity,&verbosity);
 
     return(PLUGIN_VERSION);
 }
