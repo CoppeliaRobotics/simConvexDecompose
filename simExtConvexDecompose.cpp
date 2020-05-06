@@ -20,14 +20,25 @@
 #define PLUGIN_VERSION 1
 
 static LIBRARY simLib;
-static int verbosity;
+
+bool canOutputMsg(int msgType)
+{
+    int plugin_verbosity = sim_verbosity_default;
+    simGetModuleInfo("ConvexDecompose",sim_moduleinfo_verbosity,nullptr,&plugin_verbosity);
+    return(plugin_verbosity>=msgType);
+}
+
+void outputMsg(int msgType,const char* msg)
+{
+    if (canOutputMsg(msgType))
+        printf("%s\n",msg);
+}
 
 int computeHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,size_t nClusters,double concavity,bool addExtraDistPoints,bool addFacesPoints,double ccConnectDist,size_t targetNTrianglesDecimatedMesh,size_t maxHullVertices,double smallestClusterThreshold)
 {
     int retVal=0;
 
-    if (verbosity>=sim_verbosity_infos)
-        printf("Convex decompose plugin: computing the convex decomposition (HACD)...\n");
+    outputMsg(sim_verbosity_infos,"simExtConvexDecompose plugin info: computing the convex decomposition (HACD)...");
     std::vector< HACD::Vec3<HACD::Real> > points;
     std::vector< HACD::Vec3<long> > triangles;
 
@@ -69,8 +80,8 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
     }
 
     nClusters = myHACD->GetNClusters();
-    if (verbosity>=sim_verbosity_infos)
-        printf("Convex decompose plugin: done (%i clusters generated).\n",int(nClusters));
+    if (canOutputMsg(sim_verbosity_infos))
+        printf("simExtConvexDecompose plugin info: done (%i clusters generated).\n",int(nClusters));
     retVal=int(nClusters);
 
     for(size_t c = 0; c < nClusters; ++c)
@@ -109,8 +120,7 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
 
 int computeVHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,int resolution,int depth,float concavity,int planeDownsampling,int convexHullDownsampling,float alpha,float beta,float gamma,bool pca,bool voxelBased,int maxVerticesPerCH,float minVolumePerCH)
 {
-    if (verbosity>=sim_verbosity_infos)
-        printf("Convex decompose plugin: computing the convex decomposition (VHACD)...\n");
+    outputMsg(sim_verbosity_infos,"simExtConvexDecompose plugin info: computing the convex decomposition (VHACD)...");
     VHACD::IVHACD::Parameters   params;
     params.m_resolution=uint32_t(resolution);
 //    params.m_depth=depth;
@@ -133,8 +143,8 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
     delete[] tris;
 
     unsigned int nConvexHulls=interfaceVHACD->GetNConvexHulls();
-    if (verbosity>=sim_verbosity_infos)
-        printf("Convex decompose plugin: done (%i clusters generated).\n",nConvexHulls);
+    if (canOutputMsg(sim_verbosity_infos))
+        printf("simExtConvexDecompose plugin info: done (%i clusters generated).\n",nConvexHulls);
     VHACD::IVHACD::ConvexHull ch;
     for (unsigned int p=0;p<nConvexHulls;++p)
     {
@@ -193,12 +203,12 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
     simLib=loadSimLibrary(temp.c_str());
     if (simLib==NULL)
     {
-        std::cout << "Error, could not find or correctly load the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.\n";
+        outputMsg(sim_verbosity_errors,"simExtConvexDecompose plugin error: could not find or correctly load the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.");
         return(0); 
     }
     if (getSimProcAddresses(simLib)==0)
     {
-        std::cout << "Error, could not find all required functions in the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.\n";
+        outputMsg(sim_verbosity_errors,"simExtConvexDecompose plugin error: could not find all required functions in the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.");
         unloadSimLibrary(simLib);
         return(0);
     }
@@ -208,11 +218,10 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
     simGetIntegerParameter(sim_intparam_program_version,&simVer);
     if (simVer<30201)
     {
-        std::cout << "Sorry, your CoppeliaSim copy is somewhat old. Cannot start 'ConvexDecompose' plugin.\n";
+        outputMsg(sim_verbosity_errors,"simExtConvexDecompose plugin error: sorry, your CoppeliaSim copy is somewhat old. Cannot start 'ConvexDecompose' plugin.");
         unloadSimLibrary(simLib);
         return(0);
     }
-    simGetInt32Parameter(sim_intparam_verbosity,&verbosity);
 
     return(PLUGIN_VERSION);
 }
