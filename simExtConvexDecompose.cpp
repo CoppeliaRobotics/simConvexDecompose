@@ -4,6 +4,7 @@
 #include <hacdMicroAllocator.h>
 #include "VHACD.h"
 #include <iostream>
+#include <string>
 
 #ifdef _WIN32
     #ifdef QT_COMPIL
@@ -21,24 +22,11 @@
 
 static LIBRARY simLib;
 
-bool canOutputMsg(int msgType)
-{
-    int plugin_verbosity = sim_verbosity_default;
-    simGetModuleInfo("ConvexDecompose",sim_moduleinfo_verbosity,nullptr,&plugin_verbosity);
-    return(plugin_verbosity>=msgType);
-}
-
-void outputMsg(int msgType,const char* msg)
-{
-    if (canOutputMsg(msgType))
-        printf("%s\n",msg);
-}
-
 int computeHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,size_t nClusters,double concavity,bool addExtraDistPoints,bool addFacesPoints,double ccConnectDist,size_t targetNTrianglesDecimatedMesh,size_t maxHullVertices,double smallestClusterThreshold)
 {
     int retVal=0;
 
-    outputMsg(sim_verbosity_infos,"simExtConvexDecompose: info: computing the convex decomposition (HACD)...");
+    simAddLog("ConvexDecompose",sim_verbosity_infos,"computing the convex decomposition (HACD)...");
     std::vector< HACD::Vec3<HACD::Real> > points;
     std::vector< HACD::Vec3<long> > triangles;
 
@@ -80,8 +68,11 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
     }
 
     nClusters = myHACD->GetNClusters();
-    if (canOutputMsg(sim_verbosity_infos))
-        printf("simExtConvexDecompose: info: done (%i clusters generated).\n",int(nClusters));
+    
+    std::string txt("done (");
+    txt+=std::to_string(nClusters);
+    txt+=" clusters generated).";
+    simAddLog("ConvexDecompose",sim_verbosity_infos,txt.c_str());
     retVal=int(nClusters);
 
     for(size_t c = 0; c < nClusters; ++c)
@@ -120,7 +111,7 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
 
 int computeVHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,int resolution,int depth,float concavity,int planeDownsampling,int convexHullDownsampling,float alpha,float beta,float gamma,bool pca,bool voxelBased,int maxVerticesPerCH,float minVolumePerCH)
 {
-    outputMsg(sim_verbosity_infos,"simExtConvexDecompose: info: computing the convex decomposition (VHACD)...");
+    simAddLog("ConvexDecompose",sim_verbosity_infos,"computing the convex decomposition (VHACD)...");
     VHACD::IVHACD::Parameters   params;
     params.m_resolution=uint32_t(resolution);
 //    params.m_depth=depth;
@@ -143,8 +134,12 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
     delete[] tris;
 
     unsigned int nConvexHulls=interfaceVHACD->GetNConvexHulls();
-    if (canOutputMsg(sim_verbosity_infos))
-        printf("simExtConvexDecompose: info: done (%i clusters generated).\n",nConvexHulls);
+    
+    std::string txt("done (");
+    txt+=std::to_string(nConvexHulls);
+    txt+=" clusters generated).";
+    simAddLog("ConvexDecompose",sim_verbosity_infos,txt.c_str());
+
     VHACD::IVHACD::ConvexHull ch;
     for (unsigned int p=0;p<nConvexHulls;++p)
     {
@@ -203,12 +198,12 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
     simLib=loadSimLibrary(temp.c_str());
     if (simLib==NULL)
     {
-        outputMsg(sim_verbosity_errors,"simExtConvexDecompose: error: could not find or correctly load the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.");
+        simAddLog("ConvexDecompose",sim_verbosity_errors,"could not find or correctly load the CoppeliaSim library. Cannot start the plugin.");
         return(0); 
     }
     if (getSimProcAddresses(simLib)==0)
     {
-        outputMsg(sim_verbosity_errors,"simExtConvexDecompose: error: could not find all required functions in the CoppeliaSim library. Cannot start 'ConvexDecompose' plugin.");
+        simAddLog("ConvexDecompose",sim_verbosity_errors,"could not find all required functions in the CoppeliaSim library. Cannot start the plugin.");
         unloadSimLibrary(simLib);
         return(0);
     }
