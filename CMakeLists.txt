@@ -39,6 +39,7 @@ coppeliasim_add_plugin(
     vhacd/src/vhacdRaycastMesh.cpp
     vhacd/src/vhacdVolume.cpp
 )
+target_compile_definitions(simExtConvexDecompose PRIVATE SIM_MATH_DOUBLE)
 target_include_directories(simExtConvexDecompose PRIVATE hacd)
 target_include_directories(simExtConvexDecompose PRIVATE vhacd/inc)
 target_include_directories(simExtConvexDecompose PRIVATE vhacd/public)

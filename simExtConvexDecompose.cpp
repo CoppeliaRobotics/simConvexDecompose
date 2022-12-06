@@ -22,7 +22,7 @@
 
 static LIBRARY simLib;
 
-int computeHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,size_t nClusters,double concavity,bool addExtraDistPoints,bool addFacesPoints,double ccConnectDist,size_t targetNTrianglesDecimatedMesh,size_t maxHullVertices,double smallestClusterThreshold)
+int computeHACD(const double* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<double>*>& verticesList,std::vector<std::vector<int>*>& indicesList,size_t nClusters,double concavity,bool addExtraDistPoints,bool addFacesPoints,double ccConnectDist,size_t targetNTrianglesDecimatedMesh,size_t maxHullVertices,double smallestClusterThreshold)
 {
     int retVal=0;
 
@@ -82,13 +82,13 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
         HACD::Vec3<HACD::Real> * pointsCH = new HACD::Vec3<HACD::Real>[nPoints];
         HACD::Vec3<long> * trianglesCH = new HACD::Vec3<long>[nTriangles];
         myHACD->GetCH(c, pointsCH, trianglesCH);
-        std::vector<float>* _vert=new std::vector<float>;
+        std::vector<double>* _vert=new std::vector<double>;
         std::vector<int>* _ind=new std::vector<int>;
         for (int i=0;i<int(nPoints);i++)
         {
-            _vert->push_back(float(pointsCH[i].X()));
-            _vert->push_back(float(pointsCH[i].Y()));
-            _vert->push_back(float(pointsCH[i].Z()));
+            _vert->push_back(pointsCH[i].X());
+            _vert->push_back(pointsCH[i].Y());
+            _vert->push_back(pointsCH[i].Z());
         }
         for (int i=0;i<int(nTriangles);i++)
         {
@@ -109,7 +109,7 @@ int computeHACD(const float* vertices,int verticesLength,const int* indices,int 
     return(retVal);
 }
 
-int computeVHACD(const float* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<float>*>& verticesList,std::vector<std::vector<int>*>& indicesList,int resolution,int depth,float concavity,int planeDownsampling,int convexHullDownsampling,float alpha,float beta,float gamma,bool pca,bool voxelBased,int maxVerticesPerCH,float minVolumePerCH)
+int computeVHACD(const double* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<double>*>& verticesList,std::vector<std::vector<int>*>& indicesList,int resolution,int depth,double concavity,int planeDownsampling,int convexHullDownsampling,double alpha,double beta,double gamma,bool pca,bool voxelBased,int maxVerticesPerCH,double minVolumePerCH)
 {
     simAddLog("ConvexDecompose",sim_verbosity_infos,"computing the convex decomposition (VHACD)...");
     VHACD::IVHACD::Parameters   params;
@@ -144,13 +144,13 @@ int computeVHACD(const float* vertices,int verticesLength,const int* indices,int
     for (unsigned int p=0;p<nConvexHulls;++p)
     {
         interfaceVHACD->GetConvexHull(p,ch);
-        std::vector<float>* _vert=new std::vector<float>;
+        std::vector<double>* _vert=new std::vector<double>;
         std::vector<int>* _ind=new std::vector<int>;
         for (unsigned int v=0,idx=0;v<ch.m_nPoints;++v,idx+=3)
         {
-            _vert->push_back(float(ch.m_points[idx+0]));
-            _vert->push_back(float(ch.m_points[idx+1]));
-            _vert->push_back(float(ch.m_points[idx+2]));
+            _vert->push_back(ch.m_points[idx+0]);
+            _vert->push_back(ch.m_points[idx+1]);
+            _vert->push_back(ch.m_points[idx+2]);
         }
         for (unsigned int t=0,idx=0;t<ch.m_nTriangles;++t,idx+=3)
         {
@@ -225,7 +225,7 @@ SIM_DLLEXPORT void simHACD(void* data)
 {
     // Collect info from CoppeliaSim:
     void** valPtr=(void**)data;
-    float* vertices=((float*)valPtr[0]);
+    double* vertices=((double*)valPtr[0]);
     int verticesLength=((int*)valPtr[1])[0];
     int* indices=((int*)valPtr[2]);
     int indicesLength=((int*)valPtr[3])[0];
@@ -238,15 +238,15 @@ SIM_DLLEXPORT void simHACD(void* data)
     size_t maxHullVertices=((size_t*)valPtr[10])[0];
     double smallestClusterThreshold=((double*)valPtr[11])[0];
 
-    std::vector<std::vector<float>*> verticesList;
+    std::vector<std::vector<double>*> verticesList;
     std::vector<std::vector<int>*> indicesList;
     computeHACD(vertices,verticesLength,indices,indicesLength,verticesList,indicesList,nClusters,concavity,addExtraDistPoints,addFacesPoints,ccConnectDist,targetNTrianglesDecimatedMesh,maxHullVertices,smallestClusterThreshold);
     int el=int(verticesList.size());
     ((int*)valPtr[12])[0]=el;
     if (el>0)
     {
-        float** vertList=(float**)simCreateBuffer(el*sizeof(float*));
-        ((float***)valPtr[13])[0]=vertList;
+        double** vertList=(double**)simCreateBuffer(el*sizeof(double*));
+        ((double***)valPtr[13])[0]=vertList;
         int** indList=(int**)simCreateBuffer(el*sizeof(int*));
         ((int***)valPtr[14])[0]=indList;
         int* vertCountList=(int*)simCreateBuffer(el*sizeof(int));
@@ -256,7 +256,7 @@ SIM_DLLEXPORT void simHACD(void* data)
 
         for (int mesh=0;mesh<el;mesh++)
         {
-            float* vert=(float*)simCreateBuffer(verticesList[mesh]->size()*sizeof(float));
+            double* vert=(double*)simCreateBuffer(verticesList[mesh]->size()*sizeof(double));
             for (size_t i=0;i<verticesList[mesh]->size();i++)
                 vert[i]=verticesList[mesh]->at(i);
             vertList[mesh]=vert;
@@ -274,33 +274,33 @@ SIM_DLLEXPORT void simVHACD(void* data)
 {
     // Collect info from CoppeliaSim:
     void** valPtr=(void**)data;
-    float* vertices=((float*)valPtr[0]);
+    double* vertices=((double*)valPtr[0]);
     int verticesLength=((int*)valPtr[1])[0];
     int* indices=((int*)valPtr[2]);
     int indicesLength=((int*)valPtr[3])[0];
 
     int resolution=((int*)valPtr[4])[0];
     int depth=((int*)valPtr[5])[0];
-    float concavity=((float*)valPtr[6])[0];
+    double concavity=((double*)valPtr[6])[0];
     int planeDownsampling=((int*)valPtr[7])[0];
     int convexHullDownsampling=((int*)valPtr[8])[0];
-    float alpha=((float*)valPtr[9])[0];
-    float beta=((float*)valPtr[10])[0];
-    float gamma=((float*)valPtr[11])[0];
+    double alpha=((double*)valPtr[9])[0];
+    double beta=((double*)valPtr[10])[0];
+    double gamma=((double*)valPtr[11])[0];
     bool pca=((bool*)valPtr[12])[0];
     bool voxelBased=((bool*)valPtr[13])[0];
     int maxVerticesPerCH=((int*)valPtr[14])[0];
-    float minVolumePerCH=((float*)valPtr[15])[0];
+    double minVolumePerCH=((double*)valPtr[15])[0];
 
-    std::vector<std::vector<float>*> verticesList;
+    std::vector<std::vector<double>*> verticesList;
     std::vector<std::vector<int>*> indicesList;
     computeVHACD(vertices,verticesLength,indices,indicesLength,verticesList,indicesList,resolution,depth,concavity,planeDownsampling,convexHullDownsampling,alpha,beta,gamma,pca,voxelBased,maxVerticesPerCH,minVolumePerCH);
     int el=int(verticesList.size());
     ((int*)valPtr[16])[0]=el;
     if (el>0)
     {
-        float** vertList=(float**)simCreateBuffer(el*sizeof(float*));
-        ((float***)valPtr[17])[0]=vertList;
+        double** vertList=(double**)simCreateBuffer(el*sizeof(double*));
+        ((double***)valPtr[17])[0]=vertList;
         int** indList=(int**)simCreateBuffer(el*sizeof(int*));
         ((int***)valPtr[18])[0]=indList;
         int* vertCountList=(int*)simCreateBuffer(el*sizeof(int));
@@ -310,7 +310,7 @@ SIM_DLLEXPORT void simVHACD(void* data)
 
         for (int mesh=0;mesh<el;mesh++)
         {
-            float* vert=(float*)simCreateBuffer(verticesList[mesh]->size()*sizeof(float));
+            double* vert=(double*)simCreateBuffer(verticesList[mesh]->size()*sizeof(double));
             for (size_t i=0;i<verticesList[mesh]->size();i++)
                 vert[i]=verticesList[mesh]->at(i);
             vertList[mesh]=vert;
