@@ -9,7 +9,6 @@ DEFINES += QT_COMPIL
 DEFINES += SIM_MATH_DOUBLE
 CONFIG += shared plugin
 INCLUDEPATH += "../include"
-INCLUDEPATH += "../simMath"
 INCLUDEPATH += "hacd"
 INCLUDEPATH += "vhacd/inc"
 INCLUDEPATH += "vhacd/public"
@@ -56,7 +55,7 @@ unix:!macx {
 }
 
 SOURCES += \
-    ../common/simLib.cpp \
+    ../include/simLib.cpp \
     simExtConvexDecompose.cpp \
     hacd/hacdGraph.cpp \
     hacd/hacdHACD.cpp \
