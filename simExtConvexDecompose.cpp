@@ -1,5 +1,5 @@
 #include "simExtConvexDecompose.h"
-#include <simLib.h>
+#include <simLib/simLib.h>
 #include <hacdHACD.h>
 #include <hacdMicroAllocator.h>
 #include "VHACD.h"
