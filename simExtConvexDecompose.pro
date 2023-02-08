@@ -55,7 +55,7 @@ unix:!macx {
 }
 
 SOURCES += \
-    ../include/simLib.cpp \
+    ../include/simLib/simLib.cpp \
     simExtConvexDecompose.cpp \
     hacd/hacdGraph.cpp \
     hacd/hacdHACD.cpp \
@@ -76,7 +76,7 @@ SOURCES += \
     vhacd/src/vhacdVolume.cpp \
 
 HEADERS +=\
-    ../include/simLib.h \
+    ../include/simLib/simLib.h \
     simExtConvexDecompose.h \
     hacd/hacdCircularList.h \
     hacd/hacdGraph.h \
