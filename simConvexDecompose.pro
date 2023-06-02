@@ -1,7 +1,7 @@
 QT -= core
 QT -= gui
 
-TARGET = simExtConvexDecompose
+TARGET = simConvexDecompose
 TEMPLATE = lib
 
 DEFINES -= UNICODE
@@ -57,7 +57,7 @@ unix:!macx {
 
 SOURCES += \
     ../include/simLib/simLib.cpp \
-    simExtConvexDecompose.cpp \
+    simConvexDecompose.cpp \
     hacd/hacdGraph.cpp \
     hacd/hacdHACD.cpp \
     hacd/hacdICHull.cpp \
@@ -78,7 +78,7 @@ SOURCES += \
 
 HEADERS +=\
     ../include/simLib/simLib.h \
-    simExtConvexDecompose.h \
+    simConvexDecompose.h \
     hacd/hacdCircularList.h \
     hacd/hacdGraph.h \
     hacd/hacdHACD.h \

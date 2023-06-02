@@ -1,4 +1,4 @@
-#include "simExtConvexDecompose.h"
+#include "simConvexDecompose.h"
 #include <simLib/simLib.h>
 #include <hacdHACD.h>
 #include <hacdMicroAllocator.h>
@@ -18,7 +18,7 @@
     #include <unistd.h>
 #endif
 
-#define PLUGIN_VERSION 2
+#define PLUGIN_VERSION 3
 
 static LIBRARY simLib;
 
@@ -167,7 +167,7 @@ int computeVHACD(const double* vertices,int verticesLength,const int* indices,in
     return(int(nConvexHulls));
 }
 
-SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
+SIM_DLLEXPORT int simInit(const char* pluginName)
 {
     // 1. Figure out this plugin's directory:
     char curDirAndFile[1024];
@@ -198,12 +198,12 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
     simLib=loadSimLibrary(temp.c_str());
     if (simLib==NULL)
     {
-        printf("simExtConvexDecompose: error: could not find or correctly load the CoppeliaSim library. Cannot start the plugin.\n"); // cannot use simAddLog here.
+        simAddLog(pluginName,sim_verbosity_errors,"could not find or correctly load the CoppeliaSim library. Cannot start the plugin.");
         return(0); 
     }
     if (getSimProcAddresses(simLib)==0)
     {
-        printf("simExtConvexDecompose: error: could not find all required functions in the CoppeliaSim library. Cannot start the plugin.\n"); // cannot use simAddLog here.
+        simAddLog(pluginName,sim_verbosity_errors,"could not find all required functions in the CoppeliaSim library. Cannot start the plugin.");
         unloadSimLibrary(simLib);
         return(0);
     }
@@ -211,14 +211,13 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
     return(PLUGIN_VERSION);
 }
 
-SIM_DLLEXPORT void simEnd()
+SIM_DLLEXPORT void simCleanup()
 {
     unloadSimLibrary(simLib);
 }
 
-SIM_DLLEXPORT void* simMessage(int message,int* auxiliaryData,void* customData,int* replyData)
-{ // This is called quite often. Just watch out for messages/events you want to handle
-    return(NULL);
+SIM_DLLEXPORT void simMsg(int,int*,void*)
+{
 }
 
 SIM_DLLEXPORT void simHACD(void* data)

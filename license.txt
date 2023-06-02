@@ -5,7 +5,7 @@ copying, etc.) contained in the same directory if it is present, or
 under the same terms of the files in the parent directory otherwise.
 
 -----------------------------------------------------------------------
-simExtConvexDecompose, based on v_repExtConvexDecompose from Coppelia
+simConvexDecompose, based on v_repExtConvexDecompose from Coppelia
 Robotics AG on September 2019
 
 Copyright (C) 2014-2023 Coppelia Robotics AG

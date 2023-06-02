@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(simExtConvexDecompose)
+project(simConvexDecompose)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MACOSX_RPATH 1)
@@ -17,10 +17,10 @@ list(APPEND CMAKE_MODULE_PATH ${COPPELIASIM_INCLUDE_DIR}/cmake)
 find_package(CoppeliaSim 4.5.0.0 REQUIRED)
 
 coppeliasim_add_plugin(
-    simExtConvexDecompose
+    simConvexDecompose
     LEGACY
     SOURCES
-    simExtConvexDecompose.cpp
+    simConvexDecompose.cpp
     hacd/hacdGraph.cpp
     hacd/hacdHACD.cpp
     hacd/hacdICHull.cpp
@@ -39,8 +39,10 @@ coppeliasim_add_plugin(
     vhacd/src/vhacdRaycastMesh.cpp
     vhacd/src/vhacdVolume.cpp
 )
-target_compile_definitions(simExtConvexDecompose PRIVATE SIM_MATH_DOUBLE)
-target_include_directories(simExtConvexDecompose PRIVATE hacd)
-target_include_directories(simExtConvexDecompose PRIVATE vhacd/inc)
-target_include_directories(simExtConvexDecompose PRIVATE vhacd/public)
-target_include_directories(simExtConvexDecompose PRIVATE vhacd/src)
+target_compile_definitions(simConvexDecompose PRIVATE SIM_MATH_DOUBLE)
+target_include_directories(simConvexDecompose PRIVATE hacd)
+target_include_directories(simConvexDecompose PRIVATE vhacd/inc)
+target_include_directories(simConvexDecompose PRIVATE vhacd/public)
+target_include_directories(simConvexDecompose PRIVATE vhacd/src)
+coppeliasim_add_lua(simConvexDecompose.lua)
+coppeliasim_add_lua(simConvexDecompose-ce.lua)
