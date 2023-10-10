@@ -1,3 +1,3 @@
-local simConvexDecompose=loadPlugin('simConvexDecompose')
+local simConvexDecompose = loadPlugin('simConvexDecompose');
 
 return simConvexDecompose
