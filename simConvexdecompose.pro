@@ -9,10 +9,10 @@ DEFINES += QT_COMPIL
 DEFINES += SIM_MATH_DOUBLE
 CONFIG += shared plugin
 INCLUDEPATH += "../include"
-INCLUDEPATH += "hacd"
-INCLUDEPATH += "vhacd/inc"
-INCLUDEPATH += "vhacd/public"
-INCLUDEPATH += "vhacd/src"
+INCLUDEPATH += "external/hacd"
+INCLUDEPATH += "external/vhacd/inc"
+INCLUDEPATH += "external/vhacd/public"
+INCLUDEPATH += "external/vhacd/src"
 
 *-msvc* {
     QMAKE_CXXFLAGS += -O2
