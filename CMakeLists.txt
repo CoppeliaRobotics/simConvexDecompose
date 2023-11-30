@@ -20,28 +20,28 @@ coppeliasim_add_plugin(
     simConvexDecompose
     LEGACY
     SOURCES
-    simConvexDecompose.cpp
-    hacd/hacdGraph.cpp
-    hacd/hacdHACD.cpp
-    hacd/hacdICHull.cpp
-    hacd/hacdManifoldMesh.cpp
-    hacd/hacdMeshDecimator.cpp
-    hacd/hacdMicroAllocator.cpp
-    hacd/hacdRaycastMesh.cpp
-    vhacd/src/btAlignedAllocator.cpp
-    vhacd/src/btConvexHullComputer.cpp
-    vhacd/src/FloatMath.cpp
-    vhacd/src/VHACD.cpp
-    vhacd/src/VHACD-ASYNC.cpp
-    vhacd/src/vhacdICHull.cpp
-    vhacd/src/vhacdManifoldMesh.cpp
-    vhacd/src/vhacdMesh.cpp
-    vhacd/src/vhacdRaycastMesh.cpp
-    vhacd/src/vhacdVolume.cpp
+    sourceCode/simConvexDecompose.cpp
+    external/hacd/hacdGraph.cpp
+    external/hacd/hacdHACD.cpp
+    external/hacd/hacdICHull.cpp
+    external/hacd/hacdManifoldMesh.cpp
+    external/hacd/hacdMeshDecimator.cpp
+    external/hacd/hacdMicroAllocator.cpp
+    external/hacd/hacdRaycastMesh.cpp
+    external/vhacd/src/btAlignedAllocator.cpp
+    external/vhacd/src/btConvexHullComputer.cpp
+    external/vhacd/src/FloatMath.cpp
+    external/vhacd/src/VHACD.cpp
+    external/vhacd/src/VHACD-ASYNC.cpp
+    external/vhacd/src/vhacdICHull.cpp
+    external/vhacd/src/vhacdManifoldMesh.cpp
+    external/vhacd/src/vhacdMesh.cpp
+    external/vhacd/src/vhacdRaycastMesh.cpp
+    external/vhacd/src/vhacdVolume.cpp
 )
 target_compile_definitions(simConvexDecompose PRIVATE SIM_MATH_DOUBLE)
-target_include_directories(simConvexDecompose PRIVATE hacd)
-target_include_directories(simConvexDecompose PRIVATE vhacd/inc)
-target_include_directories(simConvexDecompose PRIVATE vhacd/public)
-target_include_directories(simConvexDecompose PRIVATE vhacd/src)
-coppeliasim_add_lua(simConvexDecompose.lua)
+target_include_directories(simConvexDecompose PRIVATE external/hacd)
+target_include_directories(simConvexDecompose PRIVATE external/vhacd/inc)
+target_include_directories(simConvexDecompose PRIVATE external/vhacd/public)
+target_include_directories(simConvexDecompose PRIVATE external/vhacd/src)
+coppeliasim_add_lua(lua/simConvexDecompose.lua)
