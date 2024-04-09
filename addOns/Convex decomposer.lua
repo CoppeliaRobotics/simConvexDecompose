@@ -19,27 +19,35 @@ function init()
             ui = nil
             if params then
                 local generated = {}
-                if params.method < 2 then
-                    local cnt = 1
-                    for i = 1, #params.sel do
-                        local h = params.sel[i]
-                        local txt
-                        if params.method == 0 then
-                            txt = 'Generating HACD convex decomposed equivalent shape'
+                local convexSel = params.convexSel
+                params.convexSel = nil
+                if #params.sel > 0 then
+                    if params.method < 2 then
+                        local cnt = 1
+                        for i = 1, #params.sel do
+                            local h = params.sel[i]
+                            local txt
+                            if params.method == 0 then
+                                txt = 'Generating HACD convex decomposed equivalent shape'
+                            end
+                            if params.method == 1 then
+                                txt = 'Generating VHACD convex decomposed equivalent shape'
+                            end
+                            sim.addLog(sim.verbosity_scriptinfos, txt .. string.format(' (%i/%i)...', cnt, #params.sel)) 
+                            generated[#generated + 1] = getConvexDecomposedL(h, params, params.adoptColor)
+                            sim.addLog(sim.verbosity_scriptinfos, 'Done.')
+                            cnt = cnt + 1
                         end
-                        if params.method == 1 then
-                            txt = 'Generating VHACD convex decomposed equivalent shape'
-                        end
-                        sim.addLog(sim.verbosity_scriptinfos, txt .. string.format(' (%i/%i)...', cnt, #params.sel)) 
-                        generated[#generated + 1] = getConvexDecomposedL(h, params, params.adoptColor)
-                        sim.addLog(sim.verbosity_scriptinfos, 'Done.')
-                        cnt = cnt + 1
+                        sim.announceSceneContentChange()
                     end
-                    sim.announceSceneContentChange()
+                    if params.method == 2 then
+                        params.method = nil
+                        generated = sim.callScriptFunction('generate', sim.handle_self, params)
+                    end
                 end
-                if params.method == 2 then
-                    params.method = nil
-                    generated = sim.callScriptFunction('generate', sim.handle_self, params)
+                for i = 1, #convexSel do
+                    -- Some shapes are already convex. Simply duplicate them:
+                    generated[#generated + 1] = sim.copyPasteObjects({convexSel[i]}, 2|4|8|16|32)[1]
                 end
                 sim.setObjectSel(generated)
                 local convex = true
@@ -180,22 +188,25 @@ function initGenerate()
         end
     end
     local sel = {}
+    local convexSel = {}
     for obj, v in pairs(selMap) do
         if sim.getObjectType(obj) == sim.object_shape_type then
-            local t = sim.getShapeGeomInfo(obj)
-            if (t & 4) == 0 then
-                -- not convex
-                if not excludeHiddenShapes or (sim.getObjectInt32Param(obj, sim.objintparam_visible) > 0) then
+            if not excludeHiddenShapes or (sim.getObjectInt32Param(obj, sim.objintparam_visible) > 0) then
+                local t = sim.getShapeGeomInfo(obj)
+                if (t & 4) == 0 then
+                    -- not convex
                     sel[#sel + 1] = obj
+                else
+                    convexSel[#convexSel + 1] = obj
                 end
             end
         end
     end
     
     leaveNow = true
-    if #sel > 0 then
+    if #sel + #convexSel > 0 then
         local method = simUI.getCurrentTab(ui, ui_tab)
-        params = {adoptColor = adoptColors, sel = sel, method = method}
+        params = {adoptColor = adoptColors, sel = sel, convexSel = convexSel, method = method}
 
         if method == 2 then
             params.threshold = tonumber(simUI.getSpinboxValue(ui, ui_spinThreshold))
