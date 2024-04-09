@@ -5,8 +5,10 @@
 #include "VHACD.h"
 #include <iostream>
 #include <string>
+#include <simStack/stackArray.h>
+#include <simStack/stackMap.h>
 
-#define PLUGIN_VERSION 4
+#define PLUGIN_VERSION 5
 
 static LIBRARY simLib;
 
@@ -56,7 +58,7 @@ int computeHACD(const double* vertices,int verticesLength,const int* indices,int
     }
 
     nClusters = myHACD->GetNClusters();
-    
+
     std::string txt("done (");
     txt+=std::to_string(nClusters);
     txt+=" clusters generated).";
@@ -95,6 +97,86 @@ int computeHACD(const double* vertices,int verticesLength,const int* indices,int
     HACD::releaseHeapManager(heapManager);
 
     return(retVal);
+}
+
+void LUA_HACD_CALLBACK(SScriptCallBack* p)
+{
+    int stack=p->stackID;
+
+    CStackArray inArguments;
+    inArguments.buildFromStack(stack);
+
+    CStackArray* retHandles = new CStackArray();
+
+    if ( (inArguments.getSize()>=1) && inArguments.isNumber(0) )
+    {
+        int shape = inArguments.getInt(0);
+        CStackMap* map = nullptr;
+        if ( (inArguments.getSize()>=2) && inArguments.isMap(1) )
+            map = inArguments.getMap(1);
+
+        int min_cluster_cnt = 1;
+        if (map && map->isKeyPresent("min_cluster_cnt"))
+            min_cluster_cnt = map->getInt("min_cluster_cnt");
+        double max_concavity = 100.0;
+        if (map && map->isKeyPresent("max_concavity"))
+            max_concavity = map->getDouble("max_concavity");
+        double max_connection_dist = 30.0;
+        if (map && map->isKeyPresent("max_connection_dist"))
+            max_connection_dist = map->getDouble("max_connection_dist");
+        int triangle_cnt_decimated_mesh = 500;
+        if (map && map->isKeyPresent("triangle_cnt_decimated_mesh"))
+            triangle_cnt_decimated_mesh = map->getInt("triangle_cnt_decimated_mesh");
+        int max_vertices_cnt = 200;
+        if (map && map->isKeyPresent("max_vertices_cnt"))
+            max_vertices_cnt = map->getInt("max_vertices_cnt");
+        double small_cluster_detect_threshold = 0.25;
+        if (map && map->isKeyPresent("small_cluster_detect_threshold"))
+            small_cluster_detect_threshold = map->getDouble("small_cluster_detect_threshold");
+        bool add_extra_pts = true;
+        if (map && map->isKeyPresent("add_extra_pts"))
+            add_extra_pts = map->getBool("add_extra_pts");
+        bool add_extra_face_pts = true;
+        if (map && map->isKeyPresent("add_extra_face_pts"))
+            add_extra_face_pts = map->getBool("add_extra_face_pts");
+
+        double* vert;
+        int vertL;
+        int* ind;
+        int indL;
+        int res = simGetShapeMesh(shape, &vert, &vertL, &ind, &indL, nullptr);
+        if (res < 0)
+            simSetLastError(nullptr, "Invalid shape handle.");
+        else
+        {
+            double m[12];
+            simGetObjectMatrix(shape, -1, m);
+            for (int i = 0; i < vertL/3; i++)
+                simTransformVector(m, vert + 3 * i);
+            std::vector<std::vector<double>*> verticesList;
+            std::vector<std::vector<int>*> indicesList;
+            computeHACD(vert, vertL, ind, indL, verticesList, indicesList, min_cluster_cnt, max_concavity, add_extra_pts, add_extra_face_pts, max_connection_dist, triangle_cnt_decimated_mesh, max_vertices_cnt, small_cluster_detect_threshold);
+            simReleaseBuffer(vert);
+            simReleaseBuffer(ind);
+
+            std::vector<int> newShapes;
+            for (size_t i = 0; i < verticesList.size(); i++)
+            {
+                int h = simCreateShape(0, 0.0, verticesList[i]->data(), verticesList[i]->size(), indicesList[i]->data(), indicesList[i]->size(), nullptr, nullptr, nullptr, nullptr);
+                newShapes.push_back(h);
+                delete verticesList[i];
+                delete indicesList[i];
+            }
+            retHandles->setIntArray(newShapes.data(), newShapes.size());
+        }
+    }
+    else
+        simSetLastError(nullptr,"Not enough arguments or wrong arguments.");
+
+    // Return generated shape handles:
+    CStackArray outArguments;
+    outArguments.pushArray(retHandles);
+    outArguments.buildOntoStack(stack);
 }
 
 int computeVHACD(const double* vertices,int verticesLength,const int* indices,int indicesLength,std::vector<std::vector<double>*>& verticesList,std::vector<std::vector<int>*>& indicesList,int resolution,int depth,double concavity,int planeDownsampling,int convexHullDownsampling,double alpha,double beta,double gamma,bool pca,bool voxelBased,int maxVerticesPerCH,double minVolumePerCH)
@@ -155,6 +237,93 @@ int computeVHACD(const double* vertices,int verticesLength,const int* indices,in
     return(int(nConvexHulls));
 }
 
+void LUA_VHACD_CALLBACK(SScriptCallBack* p)
+{
+    int stack=p->stackID;
+
+    CStackArray inArguments;
+    inArguments.buildFromStack(stack);
+
+    CStackArray* retHandles = new CStackArray();
+
+    if ( (inArguments.getSize()>=1) && inArguments.isNumber(0) )
+    {
+        int shape = inArguments.getInt(0);
+        CStackMap* map = nullptr;
+        if ( (inArguments.getSize()>=2) && inArguments.isMap(1) )
+            map = inArguments.getMap(1);
+
+        int resolution = 100000;
+        if (map && map->isKeyPresent("res"))
+            resolution = map->getInt("res");
+        double concavity = 0.0025;
+        if (map && map->isKeyPresent("concavity"))
+            concavity = map->getDouble("concavity");
+        int plane_downsampling = 4;
+        if (map && map->isKeyPresent("plane_downsampling"))
+            plane_downsampling = map->getInt("plane_downsampling");
+        int hull_downsampling = 4;
+        if (map && map->isKeyPresent("hull_downsampling"))
+            hull_downsampling = map->getInt("hull_downsampling");
+        double alpha = 0.05;
+        if (map && map->isKeyPresent("alpha"))
+            alpha = map->getDouble("alpha");
+        double beta = 0.05;
+        if (map && map->isKeyPresent("beta"))
+            beta = map->getDouble("beta");
+        int max_vertices = 64;
+        if (map && map->isKeyPresent("max_vertices"))
+            max_vertices = map->getInt("max_vertices");
+        double min_volume = 0.0001;
+        if (map && map->isKeyPresent("min_volume"))
+            min_volume = map->getDouble("min_volume");
+        bool pca = false;
+        if (map && map->isKeyPresent("pca"))
+            pca = map->getBool("pca");
+        bool voxels = true;
+        if (map && map->isKeyPresent("voxels"))
+            voxels = map->getBool("voxels");
+
+        double* vert;
+        int vertL;
+        int* ind;
+        int indL;
+        int res = simGetShapeMesh(shape, &vert, &vertL, &ind, &indL, nullptr);
+        if (res < 0)
+            simSetLastError(nullptr, "Invalid shape handle.");
+        else
+        {
+            double m[12];
+            simGetObjectMatrix(shape, -1, m);
+            for (int i = 0; i < vertL/3; i++)
+                simTransformVector(m, vert + 3 * i);
+            std::vector<std::vector<double>*> verticesList;
+            std::vector<std::vector<int>*> indicesList;
+            computeVHACD(vert, vertL, ind, indL, verticesList, indicesList, resolution, 20, concavity, plane_downsampling, hull_downsampling, alpha, beta, 0.00125, pca, voxels, max_vertices, min_volume);
+
+            simReleaseBuffer(vert);
+            simReleaseBuffer(ind);
+
+            std::vector<int> newShapes;
+            for (size_t i = 0; i < verticesList.size(); i++)
+            {
+                int h = simCreateShape(0, 0.0, verticesList[i]->data(), verticesList[i]->size(), indicesList[i]->data(), indicesList[i]->size(), nullptr, nullptr, nullptr, nullptr);
+                newShapes.push_back(h);
+                delete verticesList[i];
+                delete indicesList[i];
+            }
+            retHandles->setIntArray(newShapes.data(), newShapes.size());
+        }
+    }
+    else
+        simSetLastError(nullptr,"Not enough arguments or wrong arguments.");
+
+    // Return generated shape handles:
+    CStackArray outArguments;
+    outArguments.pushArray(retHandles);
+    outArguments.buildOntoStack(stack);
+}
+
 SIM_DLLEXPORT int simInit(SSimInit* info)
 {
     simLib=loadSimLibrary(info->coppeliaSimLibPath);
@@ -169,6 +338,9 @@ SIM_DLLEXPORT int simInit(SSimInit* info)
         unloadSimLibrary(simLib);
         return(0);
     }
+
+    simRegisterScriptCallbackFunction("hacd", nullptr, LUA_HACD_CALLBACK);
+    simRegisterScriptCallbackFunction("vhacd", nullptr, LUA_VHACD_CALLBACK);
 
     return(PLUGIN_VERSION);
 }

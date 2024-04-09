@@ -57,6 +57,13 @@ unix:!macx {
 
 SOURCES += \
     ../include/simLib/simLib.cpp \
+    ../include/simStack/stackBool.cpp \
+    ../include/simStack/stackNull.cpp \
+    ../include/simStack/stackNumber.cpp \
+    ../include/simStack/stackString.cpp \
+    ../include/simStack/stackArray.cpp \
+    ../include/simStack/stackMap.cpp \
+    ../include/simStack/stackObject.cpp \
     sourceCode/simConvexDecompose.cpp \
     external/hacd/hacdGraph.cpp \
     external/hacd/hacdHACD.cpp \
@@ -78,6 +85,13 @@ SOURCES += \
 
 HEADERS +=\
     ../include/simLib/simLib.h \
+    ../include/simStack/stackBool.h \
+    ../include/simStack/stackNull.h \
+    ../include/simStack/stackNumber.h \
+    ../include/simStack/stackString.h \
+    ../include/simStack/stackArray.h \
+    ../include/simStack/stackMap.h \
+    ../include/simStack/stackObject.h \
     sourceCode/simConvexDecompose.h \
     external/hacd/hacdCircularList.h \
     external/hacd/hacdGraph.h \
